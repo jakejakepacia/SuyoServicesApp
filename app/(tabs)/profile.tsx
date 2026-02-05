@@ -1,10 +1,19 @@
+import { removeData } from "@/services/Storage";
 import Feather from "@expo/vector-icons/Feather";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-
+import { useRouter } from "expo-router";
 import { Image, StyleSheet, Text, View } from "react-native";
+import { Button } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
+
 export default function ProfileScreen() {
+  const router = useRouter();
+  const handleLogout = async () => {
+    await removeData("@user_login_tokens");
+    router.replace("/login");
+  };
+
   return (
     <SafeAreaView>
       <View style={styles.container}>
@@ -68,6 +77,13 @@ export default function ProfileScreen() {
                 color="black"
               />
             </View>
+            <Button
+              mode="contained"
+              style={{ marginTop: 16 }}
+              onPress={handleLogout}
+            >
+              Logout
+            </Button>
           </View>
         </View>
       </View>

@@ -3,7 +3,7 @@ import { Button, TextInput } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { sampleServices } from "../../data/sampleServices";
 
-export default function SearchScreen() {
+export default function ServicesScreen() {
   const insets = useSafeAreaInsets();
 
   return (

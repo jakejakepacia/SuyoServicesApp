@@ -1,16 +1,16 @@
 export const serviceCategories = [
   {
-    id: "1",
-    name: "Suyo Rider Services",
+    id: 1,
+    name: "Home Services",
     image: "https://picsum.photos/200/120?random=12",
   },
   {
-    id: "2",
-    name: "Home Services",
+    id: 2,
+    name: "Suyo Ride services",
     image: "https://picsum.photos/200/120?random=10",
   },
   {
-    id: "3",
+    id: 3,
     name: "Outdoor Services",
     image: "https://picsum.photos/200/120?random=11",
   },

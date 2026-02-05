@@ -1,15 +1,57 @@
-import { sampleServices } from "@/data/sampleServices";
 import { StatusBar } from "expo-status-bar";
+import { useEffect, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 import { TextInput } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { serviceCategories } from "../../data/serviceCategories";
+import { getServicesById } from "../../services/suyoservices";
+
+interface Service {
+  id: number;
+  serviceName: string;
+  price: number;
+  serviceCategoryId: number;
+  description: string;
+  image?: string; // optional if API doesn't provide an image
+}
 
 export default function Index() {
   const insets = useSafeAreaInsets();
+  const [servicesByCategory, setServicesByCategory] = useState<
+    Record<number, Service[]>
+  >({});
+
+  const fetchServices = async (categoryId: number) => {
+    const result = await getServicesById(categoryId);
+
+    if (result.success) {
+      setServicesByCategory((prev) => {
+        const existingServices = prev[categoryId] || [];
+
+        // Track existing IDs to avoid duplicates
+        const existingIds = new Set(existingServices.map((s) => s.id));
+
+        const newServices = result.data.filter((s) => !existingIds.has(s.id));
+
+        return {
+          ...prev,
+          [categoryId]: [...existingServices, ...newServices],
+        };
+      });
+    } else {
+      console.error("Failed to fetch services:", result.message);
+    }
+  };
+
+  // Fetch all categories on mount
+  useEffect(() => {
+    serviceCategories.forEach((category) => {
+      fetchServices(category.id);
+    });
+  }, []);
 
   return (
-    <View>
+    <View style={{ flex: 1 }}>
       <StatusBar style="light" />
       <ScrollView>
         <View style={[styles.header, { paddingTop: insets.top }]}>
@@ -19,38 +61,32 @@ export default function Index() {
             style={{ margin: 16, backgroundColor: "white" }}
           />
         </View>
+
         <View style={styles.container}>
           {serviceCategories.map((category) => (
             <View key={category.id}>
-              <View style={styles.cardContainer}>
-                <Text style={{ fontSize: 14, fontWeight: "500" }}>
-                  {category.name}
-                </Text>
-                <View
-                  style={{
-                    marginTop: 8,
-                    flexDirection: "row",
-                    gap: 12,
-                  }}
-                >
-                  {sampleServices
-                    .filter((service) => service.categoryId === category.id)
-                    .map((service) => (
-                      <View key={service.id}>
-                        <View
-                          style={{ alignItems: "center", width: 80, gap: 4 }}
-                        >
-                          <Image
-                            source={{ uri: service.image }}
-                            style={styles.serviceImage}
-                          />
-                          <Text style={{ fontSize: 12, textAlign: "center" }}>
-                            {service.name}
-                          </Text>
-                        </View>
-                      </View>
-                    ))}
-                </View>
+              <Text style={{ fontSize: 14, fontWeight: "500" }}>
+                {category.name}
+              </Text>
+              <View style={{ flexDirection: "row", gap: 12, flexWrap: "wrap" }}>
+                {servicesByCategory[category.id]?.map((service) => (
+                  <View
+                    key={service.id}
+                    style={{ alignItems: "center", width: 80, gap: 4 }}
+                  >
+                    <Image
+                      source={{
+                        uri:
+                          service.image ??
+                          "https://picsum.photos/200/120?random=" + service.id,
+                      }}
+                      style={styles.serviceImage}
+                    />
+                    <Text style={{ fontSize: 12, textAlign: "center" }}>
+                      {service.serviceName}
+                    </Text>
+                  </View>
+                ))}
               </View>
             </View>
           ))}
@@ -67,16 +103,6 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: "#1f0b0b",
-  },
-  serviceCard: {
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-    borderRadius: 8,
-    backgroundColor: "white",
   },
   cardContainer: {
     padding: 16,

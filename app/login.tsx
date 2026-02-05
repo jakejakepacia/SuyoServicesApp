@@ -9,8 +9,9 @@ import {
   TextInput,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
+import login from "../services/login";
 
-export default function Login() {
+export default function LoginScreen() {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
@@ -48,6 +49,27 @@ export default function Login() {
     );
   }
 
+  const handleLogin = async () => {
+    if (!email || !password) {
+      alert("Please enter both email and password.");
+      return;
+    }
+
+    try {
+      const result = await login(email, password);
+      if (result.success) {
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
+        console.error("Login failed: Invalid credentials");
+      }
+    } catch (error) {
+      console.error("Login failed:", error);
+      setIsAuthenticated(false);
+      return;
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <Surface style={styles.card} elevation={2}>
@@ -73,11 +95,7 @@ export default function Login() {
           style={styles.input}
         />
 
-        <Button
-          mode="contained"
-          onPress={() => setIsAuthenticated(true)}
-          style={styles.button}
-        >
+        <Button mode="contained" onPress={handleLogin} style={styles.button}>
           Login
         </Button>
       </Surface>
