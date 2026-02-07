@@ -1,59 +1,68 @@
+import { useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
-import { Button, TextInput } from "react-native-paper";
+import { Button } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { sampleServices } from "../../data/sampleServices";
+import Colors from "../constants/color";
 
 export default function ServicesScreen() {
   const insets = useSafeAreaInsets();
+
+  const [activeTab, setActiveTab] = useState("explore");
 
   return (
     <View>
       <ScrollView>
         <View style={[styles.header, { paddingTop: insets.top }]}>
-          <Text
-            style={{
-              color: "white",
-              fontSize: 20,
-              fontWeight: "bold",
-              textAlign: "center",
-            }}
-          >
-            Suyo Services Directory
-          </Text>
-          <Text style={{ color: "white", textAlign: "center" }}>
-            Find trusted suyo services in your area
-          </Text>
-          <TextInput
+          <Button
             mode="outlined"
-            placeholder="Search services..."
-            style={{ margin: 16, backgroundColor: "white" }}
-          />
+            style={{ margin: 16, height: 40 }}
+            buttonColor={
+              activeTab === "explore" ? Colors.primary : Colors.background
+            }
+            textColor={activeTab === "explore" ? "white" : Colors.text}
+            onPress={() => setActiveTab("explore")}
+          >
+            Services Near You
+          </Button>
+          <Button
+            mode="outlined"
+            style={{ margin: 16, height: 40 }}
+            buttonColor={
+              activeTab === "myBookings" ? Colors.primary : Colors.background
+            }
+            textColor={activeTab === "myBookings" ? "white" : Colors.text}
+            onPress={() => setActiveTab("myBookings")}
+          >
+            Your Orders
+          </Button>
         </View>
         <View style={styles.container}>
-          {sampleServices.map((service) => (
-            <View key={service.id} style={styles.serviceCard}>
-              <Image
-                source={{ uri: service.image }}
-                style={styles.serviceImage}
-              />
-              <View style={styles.cardContainer}>
-                <Text style={{ fontSize: 18, fontWeight: "bold" }}>
-                  {service.name}
-                </Text>
-                <Text style={{ color: "gray", marginBottom: 8 }}>
-                  {service.category}
-                </Text>
-                <Text>{service.description}</Text>
-                <Button
-                  mode="contained"
-                  style={{ marginTop: 8 }}
-                  buttonColor="#1f0b0b"
-                >
-                  Book Service
-                </Button>
+          {activeTab === "explore" &&
+            sampleServices.map((service) => (
+              <View key={service.id} style={styles.serviceCard}>
+                <Image
+                  source={{ uri: service.image }}
+                  style={styles.serviceImage}
+                />
+                <View style={styles.cardContainer}>
+                  <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+                    {service.name}
+                  </Text>
+                  <Text style={{ color: "gray", marginBottom: 8 }}>
+                    {service.category}
+                  </Text>
+                  <Text>{service.description}</Text>
+                  <Button
+                    mode="contained"
+                    style={{ marginTop: 8 }}
+                    buttonColor={Colors.primary}
+                  >
+                    Book Service
+                  </Button>
+                </View>
               </View>
-            </View>
-          ))}
+            ))}
         </View>
       </ScrollView>
     </View>
@@ -66,7 +75,9 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   header: {
-    backgroundColor: "#1f0b0b",
+    flexDirection: "row",
+    justifyContent: "center",
+    flex: 1,
   },
   serviceCard: {
     marginBottom: 16,

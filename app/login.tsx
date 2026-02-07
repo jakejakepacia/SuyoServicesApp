@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { StyleSheet } from "react-native";
@@ -23,9 +24,9 @@ export default function LoginScreen() {
   // 🔐 Simulate auto-login
   useEffect(() => {
     const autoLogin = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const loginResponse = await AsyncStorage.getItem("@user_login_response");
 
-      const hasToken = false; // 👈 toggle to true to auto-login
+      const hasToken = loginResponse !== null; //
       setIsAuthenticated(hasToken);
       setCheckingAuth(false);
     };

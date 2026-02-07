@@ -1,3 +1,5 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
@@ -5,7 +7,7 @@ import { TextInput } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { serviceCategories } from "../../data/serviceCategories";
 import { getServicesById } from "../../services/suyoservices";
-
+import Colors from "../constants/color";
 interface Service {
   id: number;
   serviceName: string;
@@ -20,6 +22,7 @@ export default function Index() {
   const [servicesByCategory, setServicesByCategory] = useState<
     Record<number, Service[]>
   >({});
+  const router = useRouter();
 
   const fetchServices = async (categoryId: number) => {
     const result = await getServicesById(categoryId);
@@ -40,6 +43,8 @@ export default function Index() {
       });
     } else {
       console.error("Failed to fetch services:", result.message);
+      await AsyncStorage.removeItem("@user_login_response");
+      router.replace("/login");
     }
   };
 
@@ -58,35 +63,51 @@ export default function Index() {
           <TextInput
             mode="outlined"
             placeholder="Search services..."
-            style={{ margin: 16, backgroundColor: "white" }}
+            outlineColor="#E5E7EB"
+            activeOutlineColor={Colors.primary}
+            style={{ margin: 16, backgroundColor: "white", height: 40 }}
+            placeholderTextColor={Colors.muted}
           />
         </View>
 
         <View style={styles.container}>
           {serviceCategories.map((category) => (
             <View key={category.id}>
-              <Text style={{ fontSize: 14, fontWeight: "500" }}>
+              <Text
+                style={{ fontSize: 14, fontWeight: "500", color: Colors.text }}
+              >
                 {category.name}
               </Text>
-              <View style={{ flexDirection: "row", gap: 12, flexWrap: "wrap" }}>
-                {servicesByCategory[category.id]?.map((service) => (
-                  <View
-                    key={service.id}
-                    style={{ alignItems: "center", width: 80, gap: 4 }}
-                  >
-                    <Image
-                      source={{
-                        uri:
-                          service.image ??
-                          "https://picsum.photos/200/120?random=" + service.id,
-                      }}
-                      style={styles.serviceImage}
-                    />
-                    <Text style={{ fontSize: 12, textAlign: "center" }}>
-                      {service.serviceName}
-                    </Text>
-                  </View>
-                ))}
+              <View
+                style={{
+                  flexDirection: "row",
+                  gap: 12,
+                  flexWrap: "wrap",
+                  marginTop: 12,
+                }}
+              >
+                {servicesByCategory[category.id]
+                  ?.sort(() => 0.5 - Math.random()) // shuffle the array randomly
+                  .slice(0, 4) // take the first 4 items
+                  .map((service) => (
+                    <View
+                      key={service.id}
+                      style={{ alignItems: "center", width: 80, gap: 4 }}
+                    >
+                      <Image
+                        source={{
+                          uri:
+                            service.image ??
+                            "https://picsum.photos/200/120?random=" +
+                              service.id,
+                        }}
+                        style={styles.serviceImage}
+                      />
+                      <Text style={{ fontSize: 12, textAlign: "center" }}>
+                        {service.serviceName}
+                      </Text>
+                    </View>
+                  ))}
               </View>
             </View>
           ))}
@@ -100,9 +121,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
+    gap: 24,
   },
   header: {
-    backgroundColor: "#1f0b0b",
+    backgroundColor: Colors.primary,
   },
   cardContainer: {
     padding: 16,

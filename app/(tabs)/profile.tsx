@@ -2,6 +2,7 @@ import { removeData } from "@/services/Storage";
 import Feather from "@expo/vector-icons/Feather";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { Image, StyleSheet, Text, View } from "react-native";
 import { Button } from "react-native-paper";
@@ -11,6 +12,7 @@ export default function ProfileScreen() {
   const router = useRouter();
   const handleLogout = async () => {
     await removeData("@user_login_tokens");
+    await AsyncStorage.removeItem("@user_login_response");
     router.replace("/login");
   };
 
