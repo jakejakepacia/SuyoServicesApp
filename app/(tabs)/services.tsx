@@ -1,71 +1,123 @@
-import { useState } from "react";
+import Feather from "@expo/vector-icons/Feather";
+import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
+import React, { useEffect, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
-import { Button } from "react-native-paper";
+import { Button, TextInput } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { sampleServices } from "../../data/sampleServices";
-import Colors from "../constants/color";
+import { getAllServices } from "../../services/suyoservices";
 
+import Colors from "../constants/color";
+const TopTab = createMaterialTopTabNavigator();
+
+// Example screens for sub-tabs
+function AvailableServicesScreen() {
+  interface Service {
+    id: number;
+    serviceName: string;
+    price: number;
+    serviceCategoryId: number;
+    description: string;
+    image?: string; // optional if API doesn't provide an image
+  }
+
+  const [allServices, setAllServices] = useState<Service[]>([]);
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      const response = await getAllServices();
+      if (response.success) {
+        setAllServices(response.data);
+      }
+    };
+    fetchServices();
+  }, []);
+
+  console.log("getAllServices:", getAllServices);
+
+  return (
+    <ScrollView>
+      <View style={styles.container}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            marginBottom: 16,
+            gap: 10,
+          }}
+        >
+          <TextInput
+            mode="outlined"
+            placeholder="Search services..."
+            outlineColor="#E5E7EB"
+            activeOutlineColor={Colors.primary}
+            style={{
+              backgroundColor: "white",
+              height: 40,
+              flex: 1, // <-- makes TextInput expand
+            }}
+            placeholderTextColor={Colors.muted}
+          />
+          <Feather name="search" size={24} color="black" />
+        </View>
+
+        {allServices.map((service) => (
+          <View key={service.id} style={styles.serviceCard}>
+            <Image
+              source={{
+                uri:
+                  service.image ??
+                  "https://picsum.photos/200/120?random=" + service.id,
+              }}
+              style={styles.serviceImage}
+            />
+            <View style={styles.cardContainer}>
+              <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+                {service.serviceName}
+              </Text>
+              <Text style={{ color: "gray", marginBottom: 8 }}>Sample</Text>
+              <Text>{service.description}</Text>
+              <Button
+                mode="contained"
+                style={{ marginTop: 8 }}
+                buttonColor={Colors.primary}
+              >
+                Book Service
+              </Button>
+            </View>
+          </View>
+        ))}
+      </View>
+    </ScrollView>
+  );
+}
+
+function MyRequestsScreen() {
+  return (
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <Text>My Requests</Text>
+    </View>
+  );
+}
+
+// ServicesScreen contains the nested top tabs
 export default function ServicesScreen() {
   const insets = useSafeAreaInsets();
 
-  const [activeTab, setActiveTab] = useState("explore");
-
   return (
-    <View>
-      <ScrollView>
-        <View style={[styles.header, { paddingTop: insets.top }]}>
-          <Button
-            mode="outlined"
-            style={{ margin: 16, height: 40 }}
-            buttonColor={
-              activeTab === "explore" ? Colors.primary : Colors.background
-            }
-            textColor={activeTab === "explore" ? "white" : Colors.text}
-            onPress={() => setActiveTab("explore")}
-          >
-            Services Near You
-          </Button>
-          <Button
-            mode="outlined"
-            style={{ margin: 16, height: 40 }}
-            buttonColor={
-              activeTab === "myBookings" ? Colors.primary : Colors.background
-            }
-            textColor={activeTab === "myBookings" ? "white" : Colors.text}
-            onPress={() => setActiveTab("myBookings")}
-          >
-            Your Orders
-          </Button>
-        </View>
-        <View style={styles.container}>
-          {activeTab === "explore" &&
-            sampleServices.map((service) => (
-              <View key={service.id} style={styles.serviceCard}>
-                <Image
-                  source={{ uri: service.image }}
-                  style={styles.serviceImage}
-                />
-                <View style={styles.cardContainer}>
-                  <Text style={{ fontSize: 18, fontWeight: "bold" }}>
-                    {service.name}
-                  </Text>
-                  <Text style={{ color: "gray", marginBottom: 8 }}>
-                    {service.category}
-                  </Text>
-                  <Text>{service.description}</Text>
-                  <Button
-                    mode="contained"
-                    style={{ marginTop: 8 }}
-                    buttonColor={Colors.primary}
-                  >
-                    Book Service
-                  </Button>
-                </View>
-              </View>
-            ))}
-        </View>
-      </ScrollView>
-    </View>
+    <TopTab.Navigator
+      screenOptions={{
+        tabBarLabelStyle: { fontSize: 14 },
+        tabBarActiveTintColor: Colors.primary,
+        tabBarIndicatorStyle: {
+          backgroundColor: Colors.primary, // <-- set your underline color here
+          height: 3, // optional, thickness of the underline
+        },
+      }}
+      style={{ paddingTop: insets.top }}
+    >
+      <TopTab.Screen name="Available" component={AvailableServicesScreen} />
+      <TopTab.Screen name="Requests" component={MyRequestsScreen} />
+    </TopTab.Navigator>
   );
 }
 

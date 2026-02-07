@@ -15,7 +15,36 @@ export async function getServicesById(id) {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
-        credentials: "include",
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.text();
+      throw new Error(error);
+    }
+
+    const data = await response.json();
+    return { success: true, data };
+  } catch (err) {
+    console.error("Fetch error:", err.message);
+    return { success: false, message: err.message };
+  }
+}
+
+export async function getAllServices() {
+  try {
+    const stored = await AsyncStorage.getItem("@user_login_response");
+    const token = stored ? JSON.parse(stored).accessToken : null;
+
+    if (!token) {
+      return { success: false, message: "No token" };
+    }
+
+    const response = await fetch(`${BASE_URL}/api/SuyoServices/allservices`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
     });
 
